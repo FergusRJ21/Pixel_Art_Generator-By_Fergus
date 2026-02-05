@@ -1,0 +1,157 @@
+* {
+    padding: 0;
+    margin: 0;
+    box-sizing: border-box;
+    font-family: monospace;
+}
+
+body {
+    background-color: #43a047;
+}
+
+.wrapper {
+    background-color: #fff;
+    width: 80vmin; /* Tamanho responsivo */
+    position: absolute;
+    transform: translate(-50%, -50%);
+    top: 50%;
+    left: 50%;
+    padding: 40px 20px;
+    border-radius: 8px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+}
+
+label {
+    display: block;
+}
+
+span {
+    position: relative;
+    font-size: 22px;
+    bottom: -1px;
+}
+
+.opt-wrapper {
+    display: flex;
+    justify-content: space-between;
+    margin-bottom: 20px;
+    gap: 10px;
+    width: 100%;
+}
+
+button {
+    background-color: #43a047;
+    border: none;
+    border-radius: 5px;
+    padding: 5px 10px;
+    color: #fff;
+    cursor: pointer;
+}
+
+button:hover {
+    background-color: #2e7d32;
+}
+
+/* Estilo para os sliders e input de cor */
+input[type="range"] {
+    cursor: pointer;
+}
+
+input[type="color"] {
+    -webkit-appearance: none;
+    -moz-appearance: none;
+    appearance: none;
+    background-color: transparent;
+    width: 40px;
+    height: 40px;
+    border: none;
+    cursor: pointer;
+}
+
+input[type="color"]::-webkit-color-swatch {
+    border-radius: 50%;
+    border: 2px solid #000;
+}
+
+input[type="color"]::-moz-color-swatch {
+    border-radius: 50%;
+    border: 2px solid #000;
+}
+
+/* Estilos da Grid */
+.container {
+    background-color: #ffffff; /* Fundo branco para a imagem salva */
+    border: 1px solid #ddd;
+    margin-top: 20px;
+    display: flex;
+    flex-direction: column;
+    align-items: center; /* Centraliza a grid */
+    padding: 10px; /* Margem interna para a imagem ficar bonita */
+}
+
+.gridRow {
+    display: flex;
+}
+
+.gridCol {
+    height: 1em;
+    width: 1em;
+    border: 1px solid #ddd;
+    /* Removemos background fixo para ver a cor transparente */
+}
+
+/* Contentor da paleta */
+.palette-container {
+    display: flex;
+    justify-content: center;
+    gap: 10px;
+    margin: 15px 0;
+    flex-wrap: wrap; /* Permite que as cores vão para a linha de baixo se não couberem */
+}
+
+/* Botões individuais de cor */
+.color-choice {
+    width: 30px;
+    height: 30px;
+    border: 2px solid #ddd;
+    border-radius: 5px;
+    cursor: pointer;
+    transition: transform 0.2s;
+}
+
+/* Efeito ao passar o rato por cima */
+.color-choice:hover {
+    transform: scale(1.2);
+    border-color: #000;
+}
+
+
+footer {
+    position: fixed; /* Fixa o elemento na tela, mesmo se fizeres scroll */
+    bottom: 10px;    /* 10px de distância do fundo */
+    width: 100%;     /* Ocupa a largura toda */
+    text-align: center; /* Texto no meio */
+    color: #ffffff;  /* Cor branca para contrastar com o fundo verde */
+    font-size: 14px;
+    opacity: 0.8;    /* Ligeiramente transparente para ficar subtil */
+}
+
+/* Opcional: Efeito quando passas o rato no nome */
+footer p span {
+    font-weight: bold;
+    cursor: default;
+}
+
+footer a {
+    color: #fff;           /* Texto branco */
+    text-decoration: none; /* Remove o sublinhado padrão */
+    font-weight: bold;     /* Deixa o nome mais grosso */
+    transition: 0.3s;      /* Efeito suave */
+}
+
+footer a:hover {
+    text-decoration: underline; /* Sublinha quando passa o rato */
+    color: #e8f5e9;             /* Um branco ligeiramente diferente */
+}
