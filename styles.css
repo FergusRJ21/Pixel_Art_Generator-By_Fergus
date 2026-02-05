@@ -2,93 +2,138 @@
     padding: 0;
     margin: 0;
     box-sizing: border-box;
-    font-family: monospace;
+    font-family: 'Courier New', monospace; /* Fonte monoespaçada mais segura */
 }
 
 body {
     background-color: #43a047;
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+}
+
+/* Área principal que empurra o footer para baixo */
+.main-content {
+    flex: 1;
+    display: flex;
+    justify-content: center;
+    align-items: flex-start; /* Permite scroll se for muito alto */
+    padding: 20px;
+    padding-bottom: 60px; /* Espaço para o footer não tapar conteúdo */
 }
 
 .wrapper {
     background-color: #fff;
-    width: 80vmin; /* Tamanho responsivo */
-    position: absolute;
-    transform: translate(-50%, -50%);
-    top: 50%;
-    left: 50%;
-    padding: 40px 20px;
-    border-radius: 8px;
+    width: 100%;
+    max-width: 800px; /* Limite para não ficar gigante em monitores */
+    padding: 25px;
+    border-radius: 12px;
+    box-shadow: 0 4px 15px rgba(0,0,0,0.2);
     display: flex;
     flex-direction: column;
     align-items: center;
 }
 
+/* Títulos e Labels */
 label {
     display: block;
+    font-weight: bold;
+    margin-bottom: 5px;
 }
 
-span {
-    position: relative;
-    font-size: 22px;
-    bottom: -1px;
+/* Layout dos Controlos */
+.controls-group {
+    width: 100%;
+    display: flex;
+    flex-direction: column;
+    gap: 15px;
 }
 
 .opt-wrapper {
     display: flex;
-    justify-content: space-between;
-    margin-bottom: 20px;
-    gap: 10px;
+    justify-content: center;
+    align-items: center;
+    gap: 15px;
+    flex-wrap: wrap; /* Importante: permite quebrar linha em telemóveis */
     width: 100%;
 }
 
+/* Sliders */
+.slider {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    flex: 1;
+    min-width: 150px;
+}
+
+input[type="range"] {
+    width: 100%;
+    cursor: pointer;
+}
+
+/* Botões */
 button {
     background-color: #43a047;
     border: none;
     border-radius: 5px;
-    padding: 5px 10px;
+    padding: 10px 15px; /* Botões maiores para toque */
     color: #fff;
     cursor: pointer;
+    font-size: 14px;
+    transition: 0.2s;
+    flex: 1; /* Botões tentam ocupar espaço igual */
+    white-space: nowrap;
 }
 
 button:hover {
     background-color: #2e7d32;
+    transform: translateY(-2px);
 }
 
-/* Estilo para os sliders e input de cor */
-input[type="range"] {
-    cursor: pointer;
+button:active {
+    transform: translateY(0);
 }
 
+/* Botão Ativo (Borda) */
+.active-tool {
+    border: 2px solid #000 !important;
+    background-color: #2e7d32;
+    font-weight: bold;
+}
+
+/* Input de Cor */
 input[type="color"] {
     -webkit-appearance: none;
-    -moz-appearance: none;
     appearance: none;
     background-color: transparent;
-    width: 40px;
-    height: 40px;
+    width: 45px;
+    height: 45px;
     border: none;
     cursor: pointer;
 }
-
 input[type="color"]::-webkit-color-swatch {
     border-radius: 50%;
-    border: 2px solid #000;
+    border: 2px solid #ddd;
 }
 
-input[type="color"]::-moz-color-swatch {
-    border-radius: 50%;
-    border: 2px solid #000;
-}
-
-/* Estilos da Grid */
-.container {
-    background-color: #ffffff; /* Fundo branco para a imagem salva */
-    border: 1px solid #ddd;
+/* Grid Area */
+.container-wrapper {
+    width: 100%;
+    display: flex;
+    justify-content: center;
+    overflow: auto; /* Se a grid for gigante, cria scroll interno */
     margin-top: 20px;
+}
+
+.container {
+    background-color: #ffffff;
+    border: 1px solid #ddd;
     display: flex;
     flex-direction: column;
-    align-items: center; /* Centraliza a grid */
-    padding: 10px; /* Margem interna para a imagem ficar bonita */
+    align-items: center;
+    padding: 1px;
+    box-shadow: 0 0 10px rgba(0,0,0,0.1);
 }
 
 .gridRow {
@@ -96,62 +141,90 @@ input[type="color"]::-moz-color-swatch {
 }
 
 .gridCol {
-    height: 1em;
-    width: 1em;
-    border: 1px solid #ddd;
-    /* Removemos background fixo para ver a cor transparente */
+    border: 1px solid #eee;
+    /* touch-action: none é CRUCIAL para desenhar em telemóveis sem fazer scroll na página */
+    touch-action: none; 
 }
 
-/* Contentor da paleta */
+/* Paleta */
 .palette-container {
     display: flex;
     justify-content: center;
-    gap: 10px;
-    margin: 15px 0;
-    flex-wrap: wrap; /* Permite que as cores vão para a linha de baixo se não couberem */
+    gap: 8px;
+    margin-bottom: 20px;
+    flex-wrap: wrap;
 }
 
-/* Botões individuais de cor */
 .color-choice {
-    width: 30px;
-    height: 30px;
-    border: 2px solid #ddd;
-    border-radius: 5px;
+    width: 35px;
+    height: 35px;
+    border: 2px solid #eee;
+    border-radius: 50%;
     cursor: pointer;
     transition: transform 0.2s;
+    padding: 0;
+    flex: none; /* Não estica */
 }
 
-/* Efeito ao passar o rato por cima */
 .color-choice:hover {
-    transform: scale(1.2);
-    border-color: #000;
+    transform: scale(1.1);
+    border-color: #555;
 }
 
-
+/* Footer */
 footer {
-    position: fixed; /* Fixa o elemento na tela, mesmo se fizeres scroll */
-    bottom: 10px;    /* 10px de distância do fundo */
-    width: 100%;     /* Ocupa a largura toda */
-    text-align: center; /* Texto no meio */
-    color: #ffffff;  /* Cor branca para contrastar com o fundo verde */
+    background-color: #2e7d32;
+    width: 100%;
+    text-align: center;
+    color: #ffffff;
+    padding: 10px 0;
     font-size: 14px;
-    opacity: 0.8;    /* Ligeiramente transparente para ficar subtil */
-}
-
-/* Opcional: Efeito quando passas o rato no nome */
-footer p span {
-    font-weight: bold;
-    cursor: default;
+    margin-top: auto; /* Garante que fica no fundo se houver pouco conteúdo */
 }
 
 footer a {
-    color: #fff;           /* Texto branco */
-    text-decoration: none; /* Remove o sublinhado padrão */
-    font-weight: bold;     /* Deixa o nome mais grosso */
-    transition: 0.3s;      /* Efeito suave */
+    color: #fff;
+    text-decoration: none;
+    font-weight: bold;
 }
 
-footer a:hover {
-    text-decoration: underline; /* Sublinha quando passa o rato */
-    color: #e8f5e9;             /* Um branco ligeiramente diferente */
+/* --- RESPONSIVIDADE (MEDIA QUERIES) --- */
+
+/* Tablets e Ecrãs Médios */
+@media (max-width: 768px) {
+    .wrapper {
+        width: 95%;
+        padding: 15px;
+    }
+    
+    .opt-wrapper {
+        gap: 10px;
+    }
+    
+    button {
+        padding: 8px 10px;
+        font-size: 12px;
+    }
+}
+
+/* Telemóveis (Ecrãs pequenos) */
+@media (max-width: 480px) {
+    .opt-wrapper.buttons-area {
+        display: grid;
+        grid-template-columns: 1fr 1fr; /* 2 colunas de botões */
+        gap: 8px;
+    }
+    
+    /* O seletor de cor e botões importantes ocupam linha inteira ou ajustam-se */
+    #submit-grid, #clear-grid {
+        grid-column: span 1; 
+    }
+    
+    input[type="color"] {
+        margin: 0 auto;
+    }
+    
+    h1 {
+        font-size: 1.2rem;
+    }
 }

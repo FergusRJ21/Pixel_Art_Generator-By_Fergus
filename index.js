@@ -8,8 +8,11 @@ let eraseBtn = document.getElementById('erase-btn');
 let paintBtn = document.getElementById('paint-btn');
 let widthValue = document.getElementById('width-value');
 let heightValue = document.getElementById('height-value');
-// Novo botão
 let downloadBtn = document.getElementById('download-btn');
+
+// NOVAS VARIÁVEIS
+let saveBtn = document.getElementById('save-btn');
+let loadBtn = document.getElementById('load-btn');
 
 let events = {
     mouse: { down: "mousedown", move: "mousemove", up: "mouseup" },
@@ -33,38 +36,48 @@ const isTouchDevice = () => {
 
 isTouchDevice();
 
-gridButton.addEventListener('click', () => {
+const updateActiveButton = (mode) => {
+    if (mode === 'paint') {
+        paintBtn.classList.add('active-tool');
+        eraseBtn.classList.remove('active-tool');
+    } else if (mode === 'erase') {
+        eraseBtn.classList.add('active-tool');
+        paintBtn.classList.remove('active-tool');
+    }
+};
+
+// --- FUNÇÃO CENTRAL PARA CRIAR A GRID ---
+// Agora aceita width e height como argumentos opcionais
+const makeGrid = (wValue, hValue) => {
     container.innerHTML = '';
     let count = 0;
-
-    // --- NOVA LÓGICA DE TAMANHO ---
-    // Pegamos na largura total disponível do wrapper (menos padding)
-    let wrapperWidth = document.querySelector('.wrapper').offsetWidth - 40; 
     
-    // Calculamos o tamanho de cada quadrado (Largura Total / Numero de Colunas)
-    // Usamos Math.floor para evitar números quebrados que causam desalinhamento
-    let colSize = Math.floor(wrapperWidth / gridWidth.value);
-    
-    // Se o quadrado ficar muito pequeno (ex: grid 100x100), definimos um mínimo
-    if(colSize < 10) colSize = 10; 
-    // -----------------------------
+    // Se não passarmos valores (clique normal), usa os sliders
+    let w = wValue || gridWidth.value;
+    let h = hValue || gridHeight.value;
 
-    for (let i = 0; i < gridHeight.value; i++) {
+    let wrapperWidth = document.querySelector('.wrapper').offsetWidth;
+    let availableWidth = wrapperWidth - 50;
+    let colSize = Math.floor(availableWidth / w);
+    
+    if(colSize > 30) colSize = 30;
+    if(colSize < 10) colSize = 10;
+
+    for (let i = 0; i < h; i++) {
         count++;
         let div = document.createElement('div');
         div.classList.add('gridRow');
 
-        for (let j = 0; j < gridWidth.value; j++) {
+        for (let j = 0; j < w; j++) {
             count++;
             let col = document.createElement('div');
             col.classList.add('gridCol');
-            col.setAttribute('id', `gridCol${count}`);
+            // Removemos IDs numéricos fixos para evitar confusão, usamos classes ou ordem
             
-            // Aplicamos o tamanho calculado dinamicamente
             col.style.width = `${colSize}px`;
             col.style.height = `${colSize}px`;
 
-            col.addEventListener(events[deviceType].down, () => {
+            col.addEventListener(events[deviceType].down, (e) => {
                 draw = true;
                 if (erase) {
                     col.style.backgroundColor = 'transparent';
@@ -74,10 +87,13 @@ gridButton.addEventListener('click', () => {
             });
 
             col.addEventListener(events[deviceType].move, (e) => {
+                if(deviceType === "touch") e.preventDefault(); 
+
                 let elementId = document.elementFromPoint(
                     !isTouchDevice() ? e.clientX : e.touches[0].clientX,
                     !isTouchDevice() ? e.clientY : e.touches[0].clientY,
                 );
+                
                 if (elementId && elementId.classList.contains('gridCol')) {
                     if (draw && !erase) {
                         elementId.style.backgroundColor = colorButton.value;
@@ -95,40 +111,98 @@ gridButton.addEventListener('click', () => {
         }
         container.appendChild(div);
     }
+    
+    erase = false;
+    updateActiveButton('paint');
+};
+
+// O botão original agora apenas chama a função
+gridButton.addEventListener('click', () => {
+    makeGrid();
 });
 
-// --- NOVA FUNÇÃO DE DOWNLOAD ---
-downloadBtn.addEventListener('click', () => {
-    // Verifica se a grid foi criada
-    if(container.innerHTML === "") return;
+// --- FUNÇÃO SALVAR (SAVE) ---
+saveBtn.addEventListener('click', () => {
+    // 1. Array para guardar as cores
+    let colorsArray = [];
+    
+    // 2. Passamos por todos os quadrados da grid
+    let columns = document.querySelectorAll('.gridCol');
+    columns.forEach(col => {
+        // Se for transparente ou vazio, guardamos "transparent", senão guardamos a cor
+        colorsArray.push(col.style.backgroundColor || 'transparent');
+    });
 
-    // Usa a biblioteca html2canvas para "tirar foto" do container
+    // 3. Criamos o objeto de dados
+    let saveData = {
+        width: gridWidth.value,
+        height: gridHeight.value,
+        colors: colorsArray
+    };
+
+    // 4. Guardamos no LocalStorage (convertendo para Texto/JSON)
+    localStorage.setItem('pixelArtSave', JSON.stringify(saveData));
+    
+    alert('Desenho guardado com sucesso!');
+});
+
+// --- FUNÇÃO CARREGAR (LOAD) ---
+loadBtn.addEventListener('click', () => {
+    // 1. Tentamos ler os dados
+    let savedData = localStorage.getItem('pixelArtSave');
+    
+    if (savedData) {
+        // 2. Convertemos de texto para objeto
+        let data = JSON.parse(savedData);
+        
+        // 3. Atualizamos os sliders visualmente para bater certo com o desenho
+        gridWidth.value = data.width;
+        gridHeight.value = data.height;
+        widthValue.innerHTML = data.width < 10 ? `0${data.width}` : data.width;
+        heightValue.innerHTML = data.height < 10 ? `0${data.height}` : data.height;
+
+        // 4. Criamos a grid com os tamanhos salvos
+        makeGrid(data.width, data.height);
+
+        // 5. Pintamos quadrado a quadrado
+        let columns = document.querySelectorAll('.gridCol');
+        
+        // O loop `forEach` tem um segundo parâmetro 'index' que é o número da volta (0, 1, 2...)
+        columns.forEach((col, index) => {
+            col.style.backgroundColor = data.colors[index];
+        });
+
+    } else {
+        alert('Nenhum desenho salvo encontrado.');
+    }
+});
+
+downloadBtn.addEventListener('click', () => {
+    if(container.innerHTML === "") return;
+    const originalBg = container.style.backgroundColor;
+    container.style.backgroundColor = "#ffffff";
     html2canvas(container).then(canvas => {
-        // Cria um link falso
         let link = document.createElement('a');
-        link.download = 'minha-pixel-art.png'; // Nome do ficheiro
-        link.href = canvas.toDataURL(); // Converte a imagem para dados
-        link.click(); // Simula o clique para baixar
+        link.download = 'pixel-art.png';
+        link.href = canvas.toDataURL();
+        link.click();
+        container.style.backgroundColor = originalBg;
     });
 });
-// ------------------------------
 
 clearGridButton.addEventListener('click', () => {
-    // Em vez de apagar o HTML, pintamos tudo de transparente para manter a grid
     let columns = document.querySelectorAll('.gridCol');
     columns.forEach(col => col.style.backgroundColor = 'transparent');
 });
 
 eraseBtn.addEventListener('click', () => {
     erase = true;
-    eraseBtn.style.border = "2px solid black";
-    paintBtn.style.border = "none";
+    updateActiveButton('erase');
 });
 
 paintBtn.addEventListener('click', () => {
     erase = false;
-    paintBtn.style.border = "2px solid black";
-    eraseBtn.style.border = "none";
+    updateActiveButton('paint');
 });
 
 gridWidth.addEventListener('input', () => {
@@ -139,59 +213,30 @@ gridHeight.addEventListener('input', () => {
     heightValue.innerHTML = gridHeight.value < 10 ? `0${gridHeight.value}` : gridHeight.value;
 });
 
-// --- LÓGICA DA PALETA DE CORES ---
-
-// 1. Definimos as cores que queremos na paleta (Hex codes)
-const colors = [
-    "#000000", // Preto
-    "#FFFFFF", // Branco
-    "#FF0000", // Vermelho
-    "#00FF00", // Verde
-    "#0000FF", // Azul
-    "#FFFF00", // Amarelo
-    "#FFA500", // Laranja
-    "#800080", // Roxo
-    "#FFC0CB", // Rosa
-    "#8B4513", // Castanho
-];
-
-// 2. Selecionamos o contentor que criámos no HTML
+const colors = ["#000000", "#FFFFFF", "#FF0000", "#00FF00", "#0000FF", "#FFFF00", "#FFA500", "#800080", "#FFC0CB", "#8B4513"];
 const paletteContainer = document.getElementById('palette');
 
-// 3. Função para gerar os botões
 const generatePalette = () => {
     colors.forEach(color => {
-        // Cria um novo botão
         let button = document.createElement('button');
         button.classList.add('color-choice');
         button.style.backgroundColor = color;
-        
-        // Define o que acontece ao clicar na cor
         button.addEventListener('click', () => {
-            // Atualiza a variável interna do seletor de cores
             colorButton.value = color;
-            
-            // (Opcional) Força o modo de pintura e desliga a borracha
             erase = false;
-            paintBtn.style.border = "2px solid black";
-            eraseBtn.style.border = "none";
+            updateActiveButton('paint');
         });
-
-        // Adiciona o botão ao contentor
         paletteContainer.appendChild(button);
     });
 };
 
-// 4. Chama a função para criar a paleta
 generatePalette();
-
 
 window.onload = () => {
     gridHeight.value = 10;
     gridWidth.value = 10;
     widthValue.innerHTML = "10";
     heightValue.innerHTML = "10";
-
-    // --- NOVO: Atualiza o ano automaticamente ---
     document.getElementById("year").innerHTML = new Date().getFullYear();
+    updateActiveButton('paint');
 };
